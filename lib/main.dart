@@ -31,16 +31,19 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.red,
       ),
       home: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('users').doc(context.read<AuthService>().currentUser?.uid).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(context.read<AuthService>().currentUser?.uid)
+            .snapshots(),
         builder: (context, snapshot) {
-            if(snapshot.hasData) {
-              Account account = Account.fromSnapshot(snapshot.data, context.read<AuthService>().currentUser?.uid);
-              return HomeViews(account: account);
-            }
-            return const CircularProgressIndicator();
+          if (snapshot.hasData) {
+            Account account = Account.fromSnapshot(
+                snapshot.data, context.read<AuthService>().currentUser?.uid);
+            return HomeViews(account: account);
+          }
+          return const CircularProgressIndicator();
         },
-
-     ),
+      ),
     );
   }
 }

@@ -11,6 +11,6 @@ class Account {
       };
 
   Account.fromSnapshot(snapshot, this.uid)
-      : bank = snapshot.data()['bank'],
-        nextFreeQuestion = snapshot.data()['nextFreeQuestion'];
+      : bank = snapshot?.data()['bank'],
+        nextFreeQuestion = snapshot?.data()['nextFreeQuestion']?.toDate();
 }
