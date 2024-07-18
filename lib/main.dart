@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:decider/models/account_model.dart';
+import 'package:decider/services/ad_mod_service.dart';
 import 'package:decider/services/auth_service.dart';
 import 'package:decider/services/firebase_service/firebase_options.dart';
 import 'package:decider/views/home_views.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -13,8 +15,14 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await AuthService().getOrCreateUser();
+  final initAdFuture = MobileAds.instance.initialize();
+  final adMobService = AdModService(initAdFuture);
+
   runApp(MultiProvider(
-    providers: [Provider.value(value: AuthService())],
+    providers: [
+      Provider.value(value: AuthService()),
+      Provider.value(value: adMobService),
+    ],
     child: const MyApp(),
   ));
 }

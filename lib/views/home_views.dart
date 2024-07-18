@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:decider/extensions/string_extensions.dart';
 import 'package:decider/models/account_model.dart';
 import 'package:decider/models/question_model.dart';
+import 'package:decider/services/ad_mod_service.dart';
 import 'package:decider/services/auth_service.dart';
 import 'package:decider/views/history_view.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:timer_count_down/timer_controller.dart';
@@ -31,6 +33,13 @@ class _HomeViewsState extends State<HomeViews> {
   int _timeTillNextFree = 0;
   final CountdownController _countDownController = CountdownController();
 
+  //Ad Related
+  late AdModService _adModService;
+  BannerAd? _banner;
+  InterstitialAd? _interstitial;
+  RewardedAd? _reward;
+  bool _showReward = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +48,24 @@ class _HomeViewsState extends State<HomeViews> {
             .inSeconds ??
         0;
     _giveFreeDecision(widget.account.bank, _timeTillNextFree);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _adModService = context.read<AdModService>();
+    _adModService.initialization.then((value) {
+      setState(() {
+        _banner = BannerAd(
+            size: AdSize.fullBanner,
+            adUnitId: _adModService.bannerAdUnitId!,
+            listener: _adModService.bannerListener,
+            request: const AdRequest())
+          ..load();
+        _createInterstitialAd();
+        _createRewardAd();
+      });
+    });
   }
 
   @override
@@ -99,6 +126,8 @@ class _HomeViewsState extends State<HomeViews> {
                 ),
                 _nextFreeCountdown(context),
                 const Spacer(),
+                _buildRewardPrompt(),
+                const Spacer(),
                 _buildQuestionForm(context),
                 const Spacer(
                   flex: 3,
@@ -108,6 +137,17 @@ class _HomeViewsState extends State<HomeViews> {
                   child: Text('Account Type: Free'),
                 ),
                 Text('${context.read<AuthService>().currentUser?.uid}'),
+                if (_banner == null)
+                  const SizedBox(
+                    height: 10,
+                  )
+                else
+                  SizedBox(
+                    height: 60,
+                    child: AdWidget(
+                      ad: _banner!,
+                    ),
+                  )
               ],
             ),
           ),
@@ -202,7 +242,34 @@ class _HomeViewsState extends State<HomeViews> {
     }
   }
 
+  Widget _buildRewardPrompt() {
+    if (_reward == null && _showReward == true) {
+      return Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Icon(
+              Icons.exposure_plus_2,
+              size: 50.0,
+              color: Colors.orange,
+            ),
+          ),
+          Text(
+            'You Receive 2 new decision',
+            style: Theme.of(context).textTheme.headlineMedium,
+          )
+        ],
+      );
+    } else if (_reward != null) {
+      return ElevatedButton(
+          onPressed: _showRewardAd, child: const Text('Get 2 Free Decision'));
+    } else {
+      return Container();
+    }
+  }
+
   void _answerQuestion() async {
+    _showInterstitialAd();
     setState(() {
       _answer = _getAnswer();
     });
@@ -225,7 +292,7 @@ class _HomeViewsState extends State<HomeViews> {
               ?.difference(DateTime.now())
               .inSeconds ??
           0;
-      if(widget.account.bank == 0) {
+      if (widget.account.bank == 0) {
         _appStatus = AppStatus.waiting;
       }
     });
@@ -256,6 +323,81 @@ class _HomeViewsState extends State<HomeViews> {
           .collection('users')
           .doc(widget.account.uid)
           .update({'bank': 1});
+    }
+  }
+
+  void _createInterstitialAd() {
+    InterstitialAd.load(
+        adUnitId: _adModService.interstitialAdUnitId!,
+        request: const AdRequest(),
+        adLoadCallback:
+            InterstitialAdLoadCallback(onAdLoaded: (InterstitialAd ad) {
+          _interstitial = ad;
+        }, onAdFailedToLoad: (LoadAdError error) {
+          _interstitial = null;
+        }));
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitial != null) {
+      _interstitial!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (InterstitialAd ad) {
+          ad.dispose();
+          _createInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+          ad.dispose();
+          _createInterstitialAd();
+        },
+      );
+      _interstitial!.show();
+      _interstitial = null;
+    }
+  }
+
+  void _increaseDecision(int quantity) {
+    final newBankValue = widget.account.bank + quantity;
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.account.uid)
+        .update({'bank': newBankValue});
+  }
+
+  void _createRewardAd() {
+    RewardedAd.load(
+        adUnitId: _adModService.rewardAdUnitId!,
+        request: const AdRequest(),
+        rewardedAdLoadCallback:
+            RewardedAdLoadCallback(onAdLoaded: (RewardedAd ad) {
+          setState(() {
+            _reward = ad;
+          });
+        }, onAdFailedToLoad: (LoadAdError error) {
+          setState(() {
+            _reward = null;
+          });
+        }));
+  }
+
+  void _showRewardAd() {
+    if (_reward != null) {
+      _reward!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (RewardedAd ad) {
+          ad.dispose();
+          _createRewardAd();
+        },
+        onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
+          ad.dispose();
+          _createRewardAd();
+        },
+      );
+      _reward!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+        _increaseDecision(2);
+        setState(() {
+          _reward = null;
+          _showReward = true;
+        });
+      });
     }
   }
 }
