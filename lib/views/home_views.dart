@@ -103,7 +103,7 @@ class _HomeViewsState extends State<HomeViews> {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const HistoryView(),
+                      builder: (context) => HistoryView(account: widget.account,),
                     ),
                   );
                 },

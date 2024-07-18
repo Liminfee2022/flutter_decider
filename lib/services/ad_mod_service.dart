@@ -34,6 +34,15 @@ class AdModService {
     return null;
   }
 
+  String? get nativeAdUnitId {
+    if(Platform.isIOS) {
+      return 'ca-app-pub-2220972025301917/8006332857';
+    } else if (Platform.isAndroid) {
+      return 'ca-app-pub-2220972025301917/1009679667';
+    }
+    return null;
+  }
+
   final BannerAdListener bannerListener = BannerAdListener(
     onAdLoaded: (Ad ad) => debugPrint('Ad loaded'),
     onAdFailedToLoad: (Ad ad, LoadAdError error) {
