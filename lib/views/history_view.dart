@@ -111,7 +111,7 @@ class _HistoryViewState extends State<HistoryView> {
                 size: AdSize.fullBanner,
                 adUnitId: adModService.bannerAdUnitId!,
                 listener: adModService.bannerListener,
-                request: AdRequest())
+                request: const AdRequest())
               ..load(),
           );
         }
