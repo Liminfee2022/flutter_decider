@@ -7,6 +7,7 @@ import 'package:decider/models/question_model.dart';
 import 'package:decider/services/ad_mod_service.dart';
 import 'package:decider/services/auth_service.dart';
 import 'package:decider/views/history_view.dart';
+import 'package:decider/views/store_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
@@ -90,7 +91,11 @@ class _HomeViewsState extends State<HomeViews> {
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const StoreView()),
+                  );
+                },
                 child: const Icon(
                   Icons.shopping_bag,
                   color: Colors.white,
