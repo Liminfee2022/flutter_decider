@@ -76,57 +76,79 @@ class _StoreViewState extends State<StoreView> {
         title: const Text('Store'),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            if (_notice != null)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(_notice!),
-              ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _products.length,
-                itemBuilder: (context, index) {
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              if (_notice != null)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(_notice!),
+                ),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: _products.length,
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(
+                      height: 6.0,
+                    );
+                  },
+                  itemBuilder: (context, index) {
+                    final ProductDetails productDetails = _products[index];
+                    final PurchaseParam purchaseParam =
+                        PurchaseParam(productDetails: productDetails);
 
-                  final ProductDetails productDetails = _products[index];
-                  final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
-
-                  return Card(
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: _getIAPIcon(productDetails.id),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                productDetails.title,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(productDetails.description, maxLines: 1, overflow: TextOverflow.ellipsis,),
-                            ],
+                    return Card(
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: _getIAPIcon(productDetails.id),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(onPressed: () {
-                            if(productDetails.id == 'premium_lmp1') {
-                              InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
-                            } else {
-                              InAppPurchase.instance.buyConsumable(purchaseParam: purchaseParam);
-                            }
-                          }, child: _buyText(productDetails),),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  productDetails.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                                Text(
+                                  productDetails.description,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6.0,
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (productDetails.id == 'premium_lmp1') {
+                                  InAppPurchase.instance.buyNonConsumable(
+                                      purchaseParam: purchaseParam);
+                                } else {
+                                  InAppPurchase.instance.buyConsumable(
+                                      purchaseParam: purchaseParam);
+                                }
+                              },
+                              child: _buyText(productDetails),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

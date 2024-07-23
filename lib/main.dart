@@ -43,21 +43,31 @@ class _DeciderAppState extends State<DeciderApp> {
 
   @override
   void initState() {
+    // final Stream purchaseUpdated = InAppPurchase.instance.purchaseStream;
+    // _iapSubscription = purchaseUpdated.listen((purchaseDetailsList) {
+    //   IAPService(context.read<AuthService>().currentUser!.uid)
+    //       .listenToPurchaseUpdated(purchaseDetailsList);
+    // }, onDone: () {
+    //   _iapSubscription.cancel();
+    // }, onError: (error) {
+    //   _iapSubscription.cancel();
+    // }) as StreamSubscription<List<PurchaseDetails>>;
     super.initState();
     final Stream purchaseUpdated = InAppPurchase.instance.purchaseStream;
+    _iapSubscription = purchaseUpdated.listen((purchaseDetailsList) {
+      IAPService(context.read<AuthService>().currentUser!.uid)
+          .listenToPurchaseUpdated(purchaseDetailsList);
+    }, onDone: () {
+      _iapSubscription.cancel();
+    }, onError: (error) {
+      _iapSubscription.cancel();
+    }) as StreamSubscription<List<PurchaseDetails>>;
+  }
 
-    _iapSubscription = purchaseUpdated.listen(
-      (purchaseDetailsList) {
-        debugPrint('Purchase stream started');
-        IAPService().listenToPurchaseUpdated(purchaseDetailsList);
-      },
-      onDone: () {
-        _iapSubscription.cancel();
-      },
-      onError: (error) {
-        _iapSubscription.cancel();
-      },
-    ) as StreamSubscription<List<PurchaseDetails>>;
+  @override
+  void dispose() {
+    _iapSubscription.cancel();
+    super.dispose();
   }
 
   @override
