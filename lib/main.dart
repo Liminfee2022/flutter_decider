@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:decider/models/account_model.dart';
@@ -11,6 +12,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -39,33 +42,47 @@ class DeciderApp extends StatefulWidget {
 }
 
 class _DeciderAppState extends State<DeciderApp> {
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   late StreamSubscription<List<PurchaseDetails>> _iapSubscription;
 
   @override
   void initState() {
-    // final Stream purchaseUpdated = InAppPurchase.instance.purchaseStream;
-    // _iapSubscription = purchaseUpdated.listen((purchaseDetailsList) {
-    //   IAPService(context.read<AuthService>().currentUser!.uid)
-    //       .listenToPurchaseUpdated(purchaseDetailsList);
-    // }, onDone: () {
-    //   _iapSubscription.cancel();
-    // }, onError: (error) {
-    //   _iapSubscription.cancel();
-    // }) as StreamSubscription<List<PurchaseDetails>>;
+    final Stream<List<PurchaseDetails>> purchaseUpdated =
+        _inAppPurchase.purchaseStream;
+    _iapSubscription =
+        purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
+          IAPService(context.read<AuthService>().currentUser!.uid)
+                 .listenToPurchaseUpdated(purchaseDetailsList);
+        }, onDone: () {
+          _iapSubscription.cancel();
+        }, onError: (Object error) {
+          _iapSubscription.cancel();
+        });
+    initStoreInfo();
     super.initState();
-    final Stream purchaseUpdated = InAppPurchase.instance.purchaseStream;
-    _iapSubscription = purchaseUpdated.listen((purchaseDetailsList) {
-      IAPService(context.read<AuthService>().currentUser!.uid)
-          .listenToPurchaseUpdated(purchaseDetailsList);
-    }, onDone: () {
-      _iapSubscription.cancel();
-    }, onError: (error) {
-      _iapSubscription.cancel();
-    }) as StreamSubscription<List<PurchaseDetails>>;
+  }
+
+  Future<void> initStoreInfo() async {
+    final bool isAvailable = await _inAppPurchase.isAvailable();
+    if (!isAvailable) {
+      return;
+    }
+    if (Platform.isIOS) {
+      final InAppPurchaseStoreKitPlatformAddition iosPlatformAddition =
+      _inAppPurchase
+          .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+      await iosPlatformAddition.setDelegate(ExamplePaymentQueueDelegate());
+    }
   }
 
   @override
   void dispose() {
+    if (Platform.isIOS) {
+      final InAppPurchaseStoreKitPlatformAddition iosPlatformAddition =
+      _inAppPurchase
+          .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+      iosPlatformAddition.setDelegate(null);
+    }
     _iapSubscription.cancel();
     super.dispose();
   }
@@ -81,7 +98,7 @@ class _DeciderAppState extends State<DeciderApp> {
       home: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('users')
-            .doc(context.read<AuthService>().currentUser?.uid)
+            .doc('9YHYefLFtNUzNCraODTQnQEgoSj1')
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -93,5 +110,18 @@ class _DeciderAppState extends State<DeciderApp> {
         },
       ),
     );
+  }
+}
+
+class ExamplePaymentQueueDelegate implements SKPaymentQueueDelegateWrapper {
+  @override
+  bool shouldContinueTransaction(
+      SKPaymentTransactionWrapper transaction, SKStorefrontWrapper storefront) {
+    return true;
+  }
+
+  @override
+  bool shouldShowPriceConsent() {
+    return false;
   }
 }

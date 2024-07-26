@@ -3,13 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-// const List<String> _productIds = <String>[
-//   'decider_lmp_5',
-//   'premium_lmp1',
-//   'unlimited_monthly',
-//   'umlimited_yearly',
-// ];
-
 const Set<String> _kIds = <String>{
   'decider_lmp_5',
   'premium_lmp1',

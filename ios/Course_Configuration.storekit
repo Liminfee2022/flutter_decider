@@ -13,15 +13,37 @@
           "description" : "Get 5 decisions to use anytime",
           "displayName" : "5 decisions",
           "locale" : "en_US"
+        },
+        {
+          "description" : "Get 5 decisions to use anytime",
+          "displayName" : "5 decisions",
+          "locale" : "vi"
         }
       ],
       "productID" : "decider_lmp_5",
       "referenceName" : "Decider 5",
       "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "5.99",
+      "familyShareable" : false,
+      "internalID" : "E721D7CF",
+      "localizations" : [
+        {
+          "description" : "Add free experience",
+          "displayName" : "Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "premium_lmp1",
+      "referenceName" : "Premium",
+      "type" : "NonConsumable"
     }
   ],
   "settings" : {
     "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
     "_storeKitErrors" : [
       {
         "current" : null,
@@ -29,7 +51,10 @@
         "name" : "Load Products"
       },
       {
-        "current" : null,
+        "current" : {
+          "index" : 1,
+          "type" : "purchase"
+        },
         "enabled" : false,
         "name" : "Purchase"
       },
@@ -71,7 +96,65 @@
     ]
   },
   "subscriptionGroups" : [
+    {
+      "id" : "89CC4C9B",
+      "localizations" : [
 
+      ],
+      "name" : "Unlimited",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "E6D58F5A",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "unlimited_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Unlimited Month",
+          "subscriptionGroupID" : "89CC4C9B",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "67B58617",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "umlimited_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Unlimited Yearly",
+          "subscriptionGroupID" : "89CC4C9B",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
   ],
   "version" : {
     "major" : 3,

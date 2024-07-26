@@ -102,20 +102,22 @@ class _HistoryViewState extends State<HistoryView> {
           List.from(data.docs.map((doc) => Question.fromSnapshot(doc)));
 
       // Add Banner ads
-      final adModService = context.read<AdModService>();
-      adModService.initialization.then((value) {
-        for (int i = _historyList.length - 3; i >= 3; i -= 3) {
-          _historyList.insert(
-            i,
-            BannerAd(
-                size: AdSize.fullBanner,
-                adUnitId: adModService.bannerAdUnitId!,
-                listener: adModService.bannerListener,
-                request: const AdRequest())
-              ..load(),
-          );
-        }
-      });
+      if(widget.account.adFree == false) {
+        final adModService = context.read<AdModService>();
+        adModService.initialization.then((value) {
+          for (int i = _historyList.length - 3; i >= 3; i -= 3) {
+            _historyList.insert(
+              i,
+              BannerAd(
+                  size: AdSize.fullBanner,
+                  adUnitId: adModService.bannerAdUnitId!,
+                  listener: adModService.bannerListener,
+                  request: const AdRequest())
+                ..load(),
+            );
+          }
+        });
+      }
     });
   }
 }

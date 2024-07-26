@@ -43,6 +43,7 @@ dependencies:
   timer_count_down: ^2.2.2
   google_mobile_ads: ^5.1.0
   in_app_purchase: ^3.2.0
+  in_app_purchase_storekit: ^0.3.17+2
 
 dev_dependencies:
   flutter_test:

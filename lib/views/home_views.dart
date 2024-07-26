@@ -54,19 +54,27 @@ class _HomeViewsState extends State<HomeViews> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _adModService = context.read<AdModService>();
-    _adModService.initialization.then((value) {
-      setState(() {
-        _banner = BannerAd(
-            size: AdSize.fullBanner,
-            adUnitId: _adModService.bannerAdUnitId!,
-            listener: _adModService.bannerListener,
-            request: const AdRequest())
-          ..load();
-        _createInterstitialAd();
-        _createRewardAd();
+    if(widget.account.adFree == false) {
+      _adModService = context.read<AdModService>();
+      _adModService.initialization.then((value) {
+        setState(() {
+          _banner = BannerAd(
+              size: AdSize.fullBanner,
+              adUnitId: _adModService.bannerAdUnitId!,
+              listener: _adModService.bannerListener,
+              request: const AdRequest())
+            ..load();
+          _createInterstitialAd();
+          _createRewardAd();
+        });
       });
-    });
+    } else {
+      setState(() {
+        _banner = null;
+        _interstitial = null;
+        _reward = null;
+      });
+    }
   }
 
   @override
@@ -108,7 +116,9 @@ class _HomeViewsState extends State<HomeViews> {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => HistoryView(account: widget.account,),
+                      builder: (context) => HistoryView(
+                        account: widget.account,
+                      ),
                     ),
                   );
                 },
@@ -131,15 +141,15 @@ class _HomeViewsState extends State<HomeViews> {
                 ),
                 _nextFreeCountdown(context),
                 const Spacer(),
-                _buildRewardPrompt(),
+                if(widget.account.adFree == false) _buildRewardPrompt(),
                 const Spacer(),
                 _buildQuestionForm(context),
                 const Spacer(
                   flex: 3,
                 ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('Account Type: Free'),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _showPlan(),
                 ),
                 Text('${context.read<AuthService>().currentUser?.uid}'),
                 if (_banner == null)
@@ -271,6 +281,15 @@ class _HomeViewsState extends State<HomeViews> {
     } else {
       return Container();
     }
+  }
+
+  Widget _showPlan() {
+    if (widget.account.unlimited == true) {
+      return const Text('Account Type: Unlimited');
+    } else if (widget.account.premium == true) {
+      return const Text('Account Type: Premium');
+    }
+    return const Text('Account Type: Free');
   }
 
   void _answerQuestion() async {

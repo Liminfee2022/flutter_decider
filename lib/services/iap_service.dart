@@ -33,9 +33,13 @@ class IAPService {
     if (purchaseDetails.productID == 'decider_lmp_5') {
       FirebaseService().increaseDecision(uid: uid, quantity: 5);
     }
-    if (purchaseDetails.productID == 'premium_lmp1') {}
+    if (purchaseDetails.productID == 'premium_lmp1') {
+      FirebaseService().setAccountType(uid: uid, type: 'premium');
+    }
     if (purchaseDetails.productID == 'unlimited_monthly' ||
-        purchaseDetails.productID == 'umlimited_yearly') {}
+        purchaseDetails.productID == 'umlimited_yearly') {
+      FirebaseService().setAccountType(uid: uid, type: 'unlimited');
+    }
   }
 
   // Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {

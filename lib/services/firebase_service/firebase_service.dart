@@ -7,4 +7,11 @@ class FirebaseService {
       'nextFreeQuestion': DateTime.now(),
     });
   }
+
+  setAccountType({uid, type}) {
+    FirebaseFirestore.instance.collection('users').doc(uid).update({
+      '$type': true,
+      'nextFreeQuestion': DateTime.now(),
+    });
+  }
 }
